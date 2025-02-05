@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Facebook custom background
 // @namespace    http://tampermonkey.net/
-// @version      0.0.1
+// @version      0.0.2
 // @description  Change background image with Base64 conversion
-// @author       You
+// @author       DauMoe
 // @match        https://www.facebook.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=facebook.com
 // @grant        none
@@ -81,7 +81,8 @@ function retrieveImage() {
   const bgContainer = document.createElement('div');
   const selector = document.createElement('div');
   const fileInput = document.createElement('input');
-  const IMAGE_BASE64 = "_IMAGE_DECODE_DATA_";
+  const darkModeColor = "#2f2f2fa6";
+  const lightModeColor = "#c9c9c999";
   const iconBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEPSURBVHgB7ZjtDYIwEIYPJmAEHIENGMFR2AQ2gg10A9gANjjvQjW1Ba5WtP3RJ7nYpG/aJ+b4KAAEIpZUPdWMYejZgV0yNbhRFRCWhapioZ4GNcTBwEII8bBYQhkBf8TcP4fISEISSUgiCUkkIYkkJJGEJH4iRA/wguoKPpjvknACtEynlmsdsu/7fyJE0/Xz3fcg0xhLNkLeTwjXg8CsqhQyOrt5byFce2LUYjwuhAwe5b8V6jY2aR0yu3lvIbR7QqdxyFh5byHc7gkdnqvR/YBp9ZMZODx10NRIPyWcy0RbXHQhfTK6O3U6l0kkIQnuoRnCf4p5wf/QHeJhiO6DVU5X+cQDqgHCsKi9K3Z5AJ4wAkK8W5ViAAAAAElFTkSuQmCC";
 
   const setBackground = base64 => {
@@ -104,8 +105,6 @@ function retrieveImage() {
     "position": "fixed",
     "top": 0,
     "left": 0,
-    "background-blend-mode": "multiply",
-    "background-color": "rgba(0, 0, 0, 0.65)",
     "background-size": "cover",
     "background-repeat": "no-repeat",
     "background-position": "center",
@@ -171,4 +170,16 @@ function retrieveImage() {
   }).catch(err => {
     console.error(err);
   });
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.target === document.documentElement && mutation.attributeName === 'class') {
+        const isDarkMode = document.documentElement.classList.contains('__fb-dark-mode');
+        bgContainer.style.backgroundBlendMode = isDarkMode ? 'darken' : 'lighten';
+        bgContainer.style.backgroundColor = isDarkMode ? darkModeColor : lightModeColor;
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, { attributes: true });
 })();
