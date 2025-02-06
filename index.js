@@ -9,71 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("ImageStorageDB", 1);
-
-    request.onerror = (event) => {
-      reject('Error opening IndexedDB');
-    };
-
-    request.onsuccess = (event) => {
-      resolve(event.target.result);
-    };
-
-    // Create an object store if this is the first time opening the DB
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      const store = db.createObjectStore("images", { keyPath: "id" });
-      store.createIndex("base64", "base64", { unique: false });
-    };
-  });
-}
-
-// Store the Base64 image into IndexedDB
-function storeImage(base64) {
-  openDB().then(db => {
-    const transaction = db.transaction("images", "readwrite");
-    const store = transaction.objectStore("images");
-
-    // Create an object with a unique ID and Base64 image string
-    const imageObj = { id: "backgroundImage", base64: base64 };
-
-    store.put(imageObj);
-
-    transaction.oncomplete = () => {
-      console.log("Image saved to IndexedDB");
-    };
-
-    transaction.onerror = () => {
-      console.error("Error saving image to IndexedDB");
-    };
-  }).catch(err => console.error(err));
-}
-
-// Retrieve the Base64 image from IndexedDB
-function retrieveImage() {
-  return new Promise((resolve, reject) => {
-    openDB().then(db => {
-      const transaction = db.transaction("images", "readonly");
-      const store = transaction.objectStore("images");
-
-      const request = store.get("backgroundImage");
-
-      request.onsuccess = (event) => {
-        if (event.target.result) {
-          resolve(event.target.result.base64);
-        } else {
-          reject('No image found');
-        }
-      };
-
-      request.onerror = () => {
-        reject('Error retrieving image from IndexedDB');
-      };
-    }).catch(err => reject(err));
-  });
-}
+import { retrieveImage, storeImage } from "./indexDB";
 
 (function () {
   'use strict';
@@ -81,8 +17,19 @@ function retrieveImage() {
   const bgContainer = document.createElement('div');
   const selector = document.createElement('div');
   const fileInput = document.createElement('input');
-  const darkModeColor = "#2f2f2fa6";
-  const lightModeColor = "#c9c9c999";
+  
+  const darkMode = {
+    blendMode: "darken",
+    overlay: "#2f2f2fa6",
+    cardBackground: "#25272880"
+  }
+
+  const lightMode = {
+    blendMode: "lighten",
+    overlay: "#d7d4d469",
+    cardBackground: "#ffffff99"
+  }
+
   const iconBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEPSURBVHgB7ZjtDYIwEIYPJmAEHIENGMFR2AQ2gg10A9gANjjvQjW1Ba5WtP3RJ7nYpG/aJ+b4KAAEIpZUPdWMYejZgV0yNbhRFRCWhapioZ4GNcTBwEII8bBYQhkBf8TcP4fISEISSUgiCUkkIYkkJJGEJH4iRA/wguoKPpjvknACtEynlmsdsu/7fyJE0/Xz3fcg0xhLNkLeTwjXg8CsqhQyOrt5byFce2LUYjwuhAwe5b8V6jY2aR0yu3lvIbR7QqdxyFh5byHc7gkdnqvR/YBp9ZMZODx10NRIPyWcy0RbXHQhfTK6O3U6l0kkIQnuoRnCf4p5wf/QHeJhiO6DVU5X+cQDqgHCsKi9K3Z5AJ4wAkK8W5ViAAAAAElFTkSuQmCC";
 
   const setBackground = base64 => {
@@ -175,8 +122,9 @@ function retrieveImage() {
     mutations.forEach((mutation) => {
       if (mutation.target === document.documentElement && mutation.attributeName === 'class') {
         const isDarkMode = document.documentElement.classList.contains('__fb-dark-mode');
-        bgContainer.style.backgroundBlendMode = isDarkMode ? 'darken' : 'lighten';
-        bgContainer.style.backgroundColor = isDarkMode ? darkModeColor : lightModeColor;
+        bgContainer.style.backgroundBlendMode = isDarkMode ? darkMode.blendMode : lightMode.blendMode;
+        bgContainer.style.backgroundColor = isDarkMode ? darkMode.overlay : lightMode.overlay
+        document.documentElement.style.setProperty('--card-background', isDarkMode ? darkMode.cardBackground : lightMode.cardBackground);
       }
     });
   });

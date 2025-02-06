@@ -13,4 +13,10 @@ Here is a temporary script that will allow you to set a beautiful local image as
 - Enjoy the new look
 
 ## Demo
-![Demo](./assets/demo.png)
+![Demo](./assets/demo.png)  
+
+## Known bugs
+- [ ] Theme is disappear on Light theme on Discussion view
+
+## Incoming features  
+- [ ] Add opacity to card background color -> image can display fully. Refer [here](https://www.facebook.com/groups/j2team.community/posts/2594866807512090/?comment_id=2594963697502401)
