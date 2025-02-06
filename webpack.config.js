@@ -2,8 +2,8 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
 
-const banner = `
-// ==UserScript==
+const banner = 
+`// ==UserScript==
 // @name         Facebook custom background
 // @namespace    http://tampermonkey.net/
 // @version      0.0.1
@@ -14,8 +14,7 @@ const banner = `
 // @grant        none
 // @downloadURL https://update.greasyfork.org/scripts/525981/Facebook%20custom%20background.user.js
 // @updateURL https://update.greasyfork.org/scripts/525981/Facebook%20custom%20background.meta.js
-// ==/UserScript==
-`;
+// ==/UserScript==`;
 
 module.exports = {
   entry: path.join(__dirname, 'index.js'),
