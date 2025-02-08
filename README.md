@@ -9,7 +9,7 @@ Here is a temporary script that will allow you to set a beautiful local image as
 - Install the `tampermonkey` extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
 - Click [here](https://greasyfork.org/en/scripts/525981-facebook-custom-background) to get the latest version of the script
 - Reload the Facebook site
-- Click the select image icon <img src="./assets/select_file.png" alt="select icon" height="20"> on the bottom left to choose a beautiful image from your machine
+- Click the select image icon <img src="https://raw.githubusercontent.com/DauMoe/facebook_custom_background/refs/heads/master/assets/demo.png" alt="select icon" height="20"> on the bottom left to choose a beautiful image from your machine
 - Enjoy the new look
 
 ## Demo
