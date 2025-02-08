@@ -6,9 +6,9 @@ const banner =
 `// ==UserScript==
 // @name         Facebook custom background
 // @namespace    http://tampermonkey.net/
-// @version      0.0.2
+// @version      0.0.3
 // @description  Change background image with Base64 conversion
-// @author       You
+// @author       DauMoe
 // @match        https://www.facebook.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=facebook.com
 // @grant        none

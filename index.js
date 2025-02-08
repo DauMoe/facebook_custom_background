@@ -7,16 +7,22 @@ import { retrieveImage, storeImage } from "./indexDB";
   const selector = document.createElement('div');
   const fileInput = document.createElement('input');
   
+  const TRANSPARENT = "transparent";
+
   const darkMode = {
     blendMode: "darken",
     overlay: "#2f2f2fa6",
-    cardBackground: "#25272880"
+    cardBackground: "#25272880",
+    surfaceBackground: "#2527289e",
+    alwaysBlack: TRANSPARENT
   }
 
   const lightMode = {
     blendMode: "lighten",
     overlay: "#d7d4d469",
-    cardBackground: "#ffffff99"
+    cardBackground: "#ffffff99",
+    surfaceBackground: "#ffffff42",
+    alwaysBlack: TRANSPARENT
   }
 
   const iconBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEPSURBVHgB7ZjtDYIwEIYPJmAEHIENGMFR2AQ2gg10A9gANjjvQjW1Ba5WtP3RJ7nYpG/aJ+b4KAAEIpZUPdWMYejZgV0yNbhRFRCWhapioZ4GNcTBwEII8bBYQhkBf8TcP4fISEISSUgiCUkkIYkkJJGEJH4iRA/wguoKPpjvknACtEynlmsdsu/7fyJE0/Xz3fcg0xhLNkLeTwjXg8CsqhQyOrt5byFce2LUYjwuhAwe5b8V6jY2aR0yu3lvIbR7QqdxyFh5byHc7gkdnqvR/YBp9ZMZODx10NRIPyWcy0RbXHQhfTK6O3U6l0kkIQnuoRnCf4p5wf/QHeJhiO6DVU5X+cQDqgHCsKi9K3Z5AJ4wAkK8W5ViAAAAAElFTkSuQmCC";
@@ -111,9 +117,41 @@ import { retrieveImage, storeImage } from "./indexDB";
     mutations.forEach((mutation) => {
       if (mutation.target === document.documentElement && mutation.attributeName === 'class') {
         const isDarkMode = document.documentElement.classList.contains('__fb-dark-mode');
+
         bgContainer.style.backgroundBlendMode = isDarkMode ? darkMode.blendMode : lightMode.blendMode;
         bgContainer.style.backgroundColor = isDarkMode ? darkMode.overlay : lightMode.overlay
-        document.documentElement.style.setProperty('--card-background', isDarkMode ? darkMode.cardBackground : lightMode.cardBackground);
+        
+        if (isDarkMode) {
+          document.querySelectorAll('.__fb-dark-mode').forEach(a => {
+            a.style.setProperty('--always-black', darkMode.alwaysBlack);
+            a.style.setProperty('--surface-background', darkMode.surfaceBackground);
+            a.style.setProperty('--web-wash', TRANSPARENT);
+            a.style.setProperty('--card-background', darkMode.cardBackground);
+          });
+        } else {
+          document.querySelectorAll('.__fb-light-mode').forEach(a => {
+            a.style.setProperty('--always-black', lightMode.alwaysBlack);
+            a.style.setProperty('--surface-background', lightMode.surfaceBackground);
+            a.style.setProperty('--web-wash', TRANSPARENT);
+            a.style.setProperty('--card-background', lightMode.cardBackground);
+          });
+        }
+
+        if (window.location.pathname === '/photo/') {
+          if (isDarkMode) {
+            document.querySelectorAll('.__fb-dark-mode').forEach(a => {
+              a.style.setProperty('--card-background', TRANSPARENT);
+              a.style.setProperty('--surface-background', "#2527282b");
+            });
+          } else {
+            document.querySelectorAll('.__fb-light-mode').forEach(a => {
+              a.style.setProperty('--card-background', TRANSPARENT);
+              a.style.setProperty('--surface-background', TRANSPARENT);
+              a.style.setProperty('--overlay-alpha-80', "#f4f4f47d");
+              a.style.setProperty('--secondary-text', "#000000");
+            });
+          }
+        }
       }
     });
   });
