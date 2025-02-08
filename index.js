@@ -1,4 +1,5 @@
 import { retrieveImage, storeImage } from "./indexDB";
+import { DARK_MODE_CLASS, isDarkMode, isPhotoMode, TRANSPARENT, darkModeStyle, lightModeStyle, LIGHT_MODE_CLASS, isGroupsMode, fileToBase64 } from "./utils";
 
 (function () {
   'use strict';
@@ -6,24 +7,6 @@ import { retrieveImage, storeImage } from "./indexDB";
   const bgContainer = document.createElement('div');
   const selector = document.createElement('div');
   const fileInput = document.createElement('input');
-  
-  const TRANSPARENT = "transparent";
-
-  const darkMode = {
-    blendMode: "darken",
-    overlay: "#2f2f2fa6",
-    cardBackground: "#25272880",
-    surfaceBackground: "#2527289e",
-    alwaysBlack: TRANSPARENT
-  }
-
-  const lightMode = {
-    blendMode: "lighten",
-    overlay: "#d7d4d469",
-    cardBackground: "#ffffff99",
-    surfaceBackground: "#ffffff42",
-    alwaysBlack: TRANSPARENT
-  }
 
   const iconBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEPSURBVHgB7ZjtDYIwEIYPJmAEHIENGMFR2AQ2gg10A9gANjjvQjW1Ba5WtP3RJ7nYpG/aJ+b4KAAEIpZUPdWMYejZgV0yNbhRFRCWhapioZ4GNcTBwEII8bBYQhkBf8TcP4fISEISSUgiCUkkIYkkJJGEJH4iRA/wguoKPpjvknACtEynlmsdsu/7fyJE0/Xz3fcg0xhLNkLeTwjXg8CsqhQyOrt5byFce2LUYjwuhAwe5b8V6jY2aR0yu3lvIbR7QqdxyFh5byHc7gkdnqvR/YBp9ZMZODx10NRIPyWcy0RbXHQhfTK6O3U6l0kkIQnuoRnCf4p5wf/QHeJhiO6DVU5X+cQDqgHCsKi9K3Z5AJ4wAkK8W5ViAAAAAElFTkSuQmCC";
 
@@ -82,15 +65,6 @@ import { retrieveImage, storeImage } from "./indexDB";
   document.body.appendChild(selector);
   document.body.appendChild(fileInput);
 
-  // Convert file to Base64
-  function fileToBase64(file, callback) {
-    const reader = new FileReader();
-    reader.onloadend = function () {
-      callback(reader.result);
-    };
-    reader.readAsDataURL(file);
-  }
-
   // Event listener for file selection
   fileInput.addEventListener('change', function (event) {
     const file = event.target.files[0];
@@ -114,47 +88,49 @@ import { retrieveImage, storeImage } from "./indexDB";
   });
 
   const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
+
+    const photoMode = isPhotoMode();
+    const darkMode = isDarkMode();
+    const groupsMode = isGroupsMode();
+
+    mutations.forEach((mutation) => {    
       if (mutation.target === document.documentElement && mutation.attributeName === 'class') {
-        const isDarkMode = document.documentElement.classList.contains('__fb-dark-mode');
+        bgContainer.style.backgroundBlendMode = darkMode ? darkModeStyle.blendMode : lightModeStyle.blendMode;
+        bgContainer.style.backgroundColor = darkMode ? darkModeStyle.overlay : lightModeStyle.overlay;
 
-        bgContainer.style.backgroundBlendMode = isDarkMode ? darkMode.blendMode : lightMode.blendMode;
-        bgContainer.style.backgroundColor = isDarkMode ? darkMode.overlay : lightMode.overlay
-        
-        if (isDarkMode) {
-          document.querySelectorAll('.__fb-dark-mode').forEach(a => {
-            a.style.setProperty('--always-black', darkMode.alwaysBlack);
-            a.style.setProperty('--surface-background', darkMode.surfaceBackground);
-            a.style.setProperty('--web-wash', TRANSPARENT);
-            a.style.setProperty('--card-background', darkMode.cardBackground);
-          });
-        } else {
-          document.querySelectorAll('.__fb-light-mode').forEach(a => {
-            a.style.setProperty('--always-black', lightMode.alwaysBlack);
-            a.style.setProperty('--surface-background', lightMode.surfaceBackground);
-            a.style.setProperty('--web-wash', TRANSPARENT);
-            a.style.setProperty('--card-background', lightMode.cardBackground);
-          });
-        }
+        document.documentElement.style.setProperty('--card-background', darkMode ? darkModeStyle.cardBackground : lightModeStyle.cardBackground);
+        document.documentElement.style.setProperty('--surface-background', groupsMode ? TRANSPARENT : lightModeStyle.surfaceBackground);
 
-        if (window.location.pathname === '/photo/') {
-          if (isDarkMode) {
-            document.querySelectorAll('.__fb-dark-mode').forEach(a => {
-              a.style.setProperty('--card-background', TRANSPARENT);
-              a.style.setProperty('--surface-background', "#2527282b");
-            });
-          } else {
-            document.querySelectorAll('.__fb-light-mode').forEach(a => {
-              a.style.setProperty('--card-background', TRANSPARENT);
-              a.style.setProperty('--surface-background', TRANSPARENT);
-              a.style.setProperty('--overlay-alpha-80', "#f4f4f47d");
-              a.style.setProperty('--secondary-text', "#000000");
-            });
+      } else if (mutation.type === 'childList' && mutation.target.tagName === 'DIV') {
+        const ele = mutation.addedNodes?.[0];
+
+        if (ele) {
+          if (ele.classList?.contains(DARK_MODE_CLASS)) {
+            
+            ele.style.setProperty('--always-black', darkModeStyle.alwaysBlack);
+            ele.style.setProperty('--surface-background', photoMode ? "#2527282b" : darkModeStyle.surfaceBackground);
+            ele.style.setProperty('--web-wash', TRANSPARENT);
+            ele.style.setProperty('--card-background', photoMode ? TRANSPARENT : darkModeStyle.cardBackground);
+
+          } else if (ele.classList?.contains(LIGHT_MODE_CLASS)) {
+
+            ele.style.setProperty('--always-black', lightModeStyle.alwaysBlack);
+            ele.style.setProperty('--surface-background', photoMode ? TRANSPARENT : lightModeStyle.surfaceBackground);
+            ele.style.setProperty('--web-wash', TRANSPARENT);
+            ele.style.setProperty('--card-background', photoMode ? TRANSPARENT : lightModeStyle.cardBackground);
+            ele.style.setProperty('--overlay-alpha-80', "#f4f4f463");
+            ele.style.setProperty('--secondary-text', "#373839");
+
+            if (photoMode) {
+              ele.style.setProperty('--secondary-text', "#000000");
+              ele.style.setProperty('--shadow-1', TRANSPARENT);
+            }
           }
+          
         }
       }
     });
   });
 
-  observer.observe(document.documentElement, { attributes: true });
+  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
 })();
