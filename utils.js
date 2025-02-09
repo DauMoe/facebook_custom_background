@@ -4,7 +4,11 @@ export const TRANSPARENT = "transparent";
 
 export const isPhotoMode = () => location.pathname.startsWith('/photo');
 export const isGroupsMode = () => location.pathname.startsWith('/groups/');
-export const isDarkMode = () =>  document.documentElement.classList.contains(DARK_MODE_CLASS);
+export const isDarkMode = () => {
+  return document.documentElement.classList.contains(DARK_MODE_CLASS) || 
+        (!document.documentElement.classList.contains(LIGHT_MODE_CLASS) && 
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
 
 export const darkModeStyle = {
   blendMode: "darken",

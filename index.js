@@ -87,20 +87,24 @@ import { DARK_MODE_CLASS, isDarkMode, isPhotoMode, TRANSPARENT, darkModeStyle, l
     console.error(err);
   });
 
+  const updateRootTheme = () => {
+    const darkMode = isDarkMode();
+    const groupsMode = isGroupsMode();
+  
+    bgContainer.style.backgroundBlendMode = darkMode ? darkModeStyle.blendMode : lightModeStyle.blendMode;
+    bgContainer.style.backgroundColor = darkMode ? darkModeStyle.overlay : lightModeStyle.overlay;
+  
+    document.documentElement.style.setProperty('--card-background', darkMode ? darkModeStyle.cardBackground : lightModeStyle.cardBackground);
+    document.documentElement.style.setProperty('--surface-background', groupsMode ? TRANSPARENT : lightModeStyle.surfaceBackground);
+  }
+
   const observer = new MutationObserver((mutations) => {
 
     const photoMode = isPhotoMode();
-    const darkMode = isDarkMode();
-    const groupsMode = isGroupsMode();
 
     mutations.forEach((mutation) => {    
       if (mutation.target === document.documentElement && mutation.attributeName === 'class') {
-        bgContainer.style.backgroundBlendMode = darkMode ? darkModeStyle.blendMode : lightModeStyle.blendMode;
-        bgContainer.style.backgroundColor = darkMode ? darkModeStyle.overlay : lightModeStyle.overlay;
-
-        document.documentElement.style.setProperty('--card-background', darkMode ? darkModeStyle.cardBackground : lightModeStyle.cardBackground);
-        document.documentElement.style.setProperty('--surface-background', groupsMode ? TRANSPARENT : lightModeStyle.surfaceBackground);
-
+        updateRootTheme();
       } else if (mutation.type === 'childList' && mutation.target.tagName === 'DIV') {
         const ele = mutation.addedNodes?.[0];
 
@@ -132,5 +136,9 @@ import { DARK_MODE_CLASS, isDarkMode, isPhotoMode, TRANSPARENT, darkModeStyle, l
     });
   });
 
+  // Handle automatic theme detector
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateRootTheme);
+
+  // Handle new node and specific theme
   observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
 })();

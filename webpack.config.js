@@ -6,7 +6,7 @@ const banner =
 `// ==UserScript==
 // @name         Facebook custom background
 // @namespace    http://tampermonkey.net/
-// @version      0.0.4
+// @version      0.0.5
 // @description  Custom facebook background
 // @author       DauMoe
 // @match        https://www.facebook.com/*
